@@ -1,133 +1,198 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Upload, Play, Film } from 'lucide-react'
-import { getVideos, getShorts } from '@/app/actions/videos'
-import { BottomNav } from '@/components/bottom-nav'
+import { useRouter } from 'next/navigation'
+import { getVideos } from '@/app/actions/videos'
+import { authClient } from '@/lib/auth-client'
 import { TopHeader } from '@/components/top-header'
+import { BottomNav } from '@/components/bottom-nav'
+import { Tabs } from '@/components/tabs'
+import { StoryCarousel } from '@/components/watch/story-carousel'
+import { VideosGrid } from '@/components/watch/videos-grid'
+import { Play, Zap, Clock } from 'lucide-react'
+
+interface Video {
+  id: string
+  title: string
+  description?: string
+  thumbnail?: string
+  duration: number
+  views: number
+  likes?: number
+  createdAt: string
+  creator?: string
+  type?: string
+}
 
 export default function WatchPage() {
-  const [activeTab, setActiveTab] = useState<'videos' | 'shorts'>('videos')
-  const [videos, setVideos] = useState<any[]>([])
-  const [shorts, setShorts] = useState<any[]>([])
+  const router = useRouter()
+  const [videos, setVideos] = useState<Video[]>([])
+  const [activeTab, setActiveTab] = useState('all')
+  const [selectedStory, setSelectedStory] = useState<Video | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function loadVideos() {
+    const loadVideos = async () => {
       try {
-        setLoading(true)
-        const [videosData, shortsData] = await Promise.all([
-          getVideos(),
-          getShorts(),
-        ])
-        setVideos(videosData || [])
-        setShorts(shortsData || [])
+        // Check if user is authenticated
+        const { data: session } = await authClient.getSession()
+        if (!session?.user) {
+          router.push('/sign-in')
+          return
+        }
+
+        // Load videos
+        const videosData = await getVideos()
+        if (videosData) {
+          setVideos(videosData)
+        }
       } catch (error) {
-        console.log('[v0] Error loading videos:', error)
+        console.error('[v0] Error loading videos:', error)
       } finally {
         setLoading(false)
       }
     }
-    loadVideos()
-  }, [])
 
-  const displayedVideos = activeTab === 'videos' ? videos : shorts
+    loadVideos()
+  }, [router])
+
+  const tabs = [
+    { id: 'all', label: 'All Videos', icon: <Play size={18} />, count: videos.length },
+    { id: 'trending', label: 'Trending', icon: <Zap size={18} />, count: videos.filter(v => v.views > 5000).length },
+    { id: 'recent', label: 'Recent', icon: <Clock size={18} />, count: videos.length },
+  ]
+
+  const filteredVideos = videos.filter((video) => {
+    if (activeTab === 'trending') return video.views > 5000
+    if (activeTab === 'recent') return true
+    return true
+  })
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-full border-4 border-border border-t-accent animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading videos...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <TopHeader />
       <BottomNav />
-      <main className="space-y-6 p-6 max-w-4xl mx-auto pb-32 pt-20">
-        {/* Header */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 text-white">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-2xl">🎬</span>
-            <span className="text-sm font-semibold uppercase text-gray-400">WATCH</span>
+
+      <main className="max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-8 pb-32">
+        {/* Header Section */}
+        <div className="space-y-4">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Watch
+            </h1>
+            <p className="text-muted-foreground mt-2">Discover amazing videos and stories from creators</p>
           </div>
-          <h1 className="text-3xl font-bold mb-3">Reels, shorts & founder talks</h1>
-          <p className="text-gray-400 mb-6">
-            Once creators start posting, you&apos;ll see videos and shorts from the STARO community here.
-          </p>
-          <button className="flex items-center gap-2 bg-white text-gray-900 font-semibold py-3 px-6 rounded-full hover:bg-gray-100 transition">
-            <Upload size={20} />
-            Upload a video
-          </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 border-b dark:border-gray-700">
-          <button
-            onClick={() => setActiveTab('videos')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'videos'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-            }`}
-          >
-            <Film size={18} className="inline mr-2" />
-            Videos
-          </button>
-          <button
-            onClick={() => setActiveTab('shorts')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'shorts'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-            }`}
-          >
-            <Play size={18} className="inline mr-2" />
-            Shorts
-          </button>
-        </div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">Loading {activeTab}...</p>
-          </div>
-        ) : displayedVideos.length === 0 ? (
-          <div className="text-center py-12">
-            <Play size={48} className="mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">No {activeTab} yet</p>
-            <p className="text-sm text-gray-500 mt-2">Be the first to upload!</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displayedVideos.map(video => (
-              <div
-                key={video.id}
-                className="bg-white dark:bg-gray-900 rounded-lg overflow-hidden border dark:border-gray-700 hover:shadow-lg transition cursor-pointer"
-              >
-                <div className="aspect-video bg-gray-800 flex items-center justify-center">
-                  {video.thumbnail ? (
-                    <img
-                      src={video.thumbnail}
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Play size={48} className="text-gray-600" />
-                  )}
-                </div>
-                <div className="p-3">
-                  <h3 className="font-semibold text-sm line-clamp-2 text-gray-900 dark:text-white">
-                    {video.title}
-                  </h3>
-                  {video.description && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                      {video.description}
-                    </p>
-                  )}
-                  <div className="flex gap-2 mt-2 text-xs text-gray-600 dark:text-gray-400">
-                    <span>{video.views || 0} views</span>
-                    {video.duration && <span>{Math.floor(video.duration / 60)}m</span>}
+        {/* Featured Stories Section */}
+        {videos.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold text-foreground">Featured Stories</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {videos.slice(0, 5).map((video) => (
+                <button
+                  key={video.id}
+                  onClick={() => setSelectedStory(video)}
+                  className="group relative rounded-2xl overflow-hidden h-40 border border-border hover:border-accent/50 transition-all duration-300 transform hover:scale-105"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:from-blue-500/40 group-hover:to-purple-500/40 transition-colors"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/40 transition-colors">
+                      <Play size={16} className="text-white ml-0.5 fill-white" />
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                    <p className="text-white text-xs font-medium truncate">{video.title}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
         )}
+
+        {/* Video Categories Tabs */}
+        <section>
+          <Tabs
+            items={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            variant="pills"
+            size="md"
+          />
+        </section>
+
+        {/* Videos Grid */}
+        <section className="animate-fade-in">
+          {activeTab === 'all' && (
+            <VideosGrid
+              videos={filteredVideos.map(v => ({
+                ...v,
+                creator: v.creator || 'Creator',
+                likes: v.likes || 0,
+              }))}
+              onVideoSelect={(video) => setSelectedStory(video)}
+            />
+          )}
+          {activeTab === 'trending' && (
+            <VideosGrid
+              videos={filteredVideos.map(v => ({
+                ...v,
+                creator: v.creator || 'Creator',
+                likes: v.likes || 0,
+              }))}
+              onVideoSelect={(video) => setSelectedStory(video)}
+            />
+          )}
+          {activeTab === 'recent' && (
+            <VideosGrid
+              videos={filteredVideos.map(v => ({
+                ...v,
+                creator: v.creator || 'Creator',
+                likes: v.likes || 0,
+              }))}
+              onVideoSelect={(video) => setSelectedStory(video)}
+            />
+          )}
+        </section>
+
+        {/* Upload Section */}
+        <section className="card-glass rounded-2xl p-8 border border-border text-center">
+          <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
+            <Play size={32} className="text-accent" />
+          </div>
+          <h3 className="text-2xl font-bold text-foreground mb-2">Share Your Videos</h3>
+          <p className="text-muted-foreground mb-6">Upload and share your content with the STARO community</p>
+          <button className="btn-primary">Upload Video</button>
+        </section>
       </main>
-    </>
+
+      {/* Story Carousel Modal */}
+      {selectedStory && (
+        <StoryCarousel
+          items={[
+            {
+              id: selectedStory.id,
+              title: selectedStory.title,
+              description: selectedStory.description,
+              duration: selectedStory.duration || 5,
+              thumbnail: selectedStory.thumbnail,
+              type: 'video',
+            },
+          ]}
+          onClose={() => setSelectedStory(null)}
+        />
+      )}
+    </div>
   )
 }
