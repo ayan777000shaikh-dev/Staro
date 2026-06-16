@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Upload, Play, Film } from 'lucide-react'
 import { getVideos, getShorts } from '@/app/actions/videos'
 import { BottomNav } from '@/components/bottom-nav'
+import { TopHeader } from '@/components/top-header'
 
 export default function WatchPage() {
   const [activeTab, setActiveTab] = useState<'videos' | 'shorts'>('videos')
@@ -34,8 +35,9 @@ export default function WatchPage() {
 
   return (
     <>
+      <TopHeader />
       <BottomNav />
-      <main className="space-y-6 p-6 max-w-4xl mx-auto pb-32">
+      <main className="space-y-6 p-6 max-w-4xl mx-auto pb-32 pt-20">
         {/* Header */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 text-white">
           <div className="flex items-center gap-2 mb-4">

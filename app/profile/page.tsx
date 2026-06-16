@@ -6,6 +6,7 @@ import { getCurrentUserProfile, createOrUpdateProfile } from '@/app/actions/user
 import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 import { BottomNav } from '@/components/bottom-nav'
+import { TopHeader } from '@/components/top-header'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -70,6 +71,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <>
+        <TopHeader />
         <BottomNav />
         <main className="p-6 text-center">Loading profile...</main>
       </>
@@ -78,8 +80,9 @@ export default function ProfilePage() {
 
   return (
     <>
+      <TopHeader />
       <BottomNav />
-      <main className="space-y-6 p-6 max-w-2xl mx-auto pb-32">
+      <main className="space-y-6 p-6 max-w-2xl mx-auto pb-32 pt-20">
         {/* Header Background */}
         <div className="h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg"></div>
 

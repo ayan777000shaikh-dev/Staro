@@ -6,6 +6,7 @@ import { getPulse, logShip } from '@/app/actions/pulse'
 import { createPost, getPosts } from '@/app/actions/posts'
 import { useRouter } from 'next/navigation'
 import { BottomNav } from '@/components/bottom-nav'
+import { TopHeader } from '@/components/top-header'
 
 export default function HomePage() {
   const router = useRouter()
@@ -63,8 +64,9 @@ export default function HomePage() {
 
   return (
     <>
+      <TopHeader />
       <BottomNav />
-      <main className="space-y-6 p-6 max-w-2xl mx-auto">
+      <main className="space-y-6 p-6 max-w-2xl mx-auto pt-20">
       {/* STARO Pulse Section */}
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 rounded-2xl p-6 text-white">
         <div className="flex items-center gap-2 mb-4 text-orange-400">

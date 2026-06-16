@@ -12,6 +12,7 @@ import {
 } from '@/app/actions/users'
 import { useRouter } from 'next/navigation'
 import { BottomNav } from '@/components/bottom-nav'
+import { TopHeader } from '@/components/top-header'
 
 export default function NetworkPage() {
   const router = useRouter()
@@ -44,8 +45,9 @@ export default function NetworkPage() {
 
   return (
     <>
+      <TopHeader />
       <BottomNav />
-      <main className="space-y-6 p-6 max-w-2xl mx-auto">
+      <main className="space-y-6 p-6 max-w-2xl mx-auto pt-20">
       {/* Search Bar */}
       <div className="relative">
         <input
