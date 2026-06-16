@@ -24,60 +24,79 @@ export function BottomNav() {
 
   return (
     <>
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-black border-t dark:border-gray-800 flex items-center justify-around h-16 md:hidden">
+      {/* Bottom Navigation - Instagram Style */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-black/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-800/50 flex items-center justify-around h-14 md:hidden z-40">
         <Link
           href="/home"
-          className={`flex flex-col items-center justify-center w-full h-full ${
-            isActive('/home') ? 'text-black dark:text-white' : 'text-gray-400'
+          className={`flex items-center justify-center w-full h-full transition-all duration-200 ${
+            isActive('/home')
+              ? 'text-black dark:text-white'
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
           }`}
+          title="Home"
         >
-          <Home size={24} />
+          <Home size={22} className="hover:scale-110 transition-transform" />
         </Link>
         <Link
           href="/explore"
-          className={`flex flex-col items-center justify-center w-full h-full ${
-            isActive('/explore') ? 'text-black dark:text-white' : 'text-gray-400'
+          className={`flex items-center justify-center w-full h-full transition-all duration-200 ${
+            isActive('/explore')
+              ? 'text-black dark:text-white'
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
           }`}
+          title="Explore"
         >
-          <Search size={24} />
+          <Search size={22} className="hover:scale-110 transition-transform" />
         </Link>
         <Link
           href="/watch"
-          className={`flex flex-col items-center justify-center w-full h-full ${
-            isActive('/watch') ? 'text-black dark:text-white' : 'text-gray-400'
+          className={`flex items-center justify-center w-full h-full transition-all duration-200 ${
+            isActive('/watch')
+              ? 'text-black dark:text-white'
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
           }`}
+          title="Watch"
         >
-          <Plus size={24} />
+          <Plus size={22} className="hover:scale-110 transition-transform" />
         </Link>
         <Link
           href="/network"
-          className={`flex flex-col items-center justify-center w-full h-full ${
-            isActive('/network') ? 'text-black dark:text-white' : 'text-gray-400'
+          className={`flex items-center justify-center w-full h-full transition-all duration-200 ${
+            isActive('/network')
+              ? 'text-black dark:text-white'
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
           }`}
+          title="Network"
         >
-          <Grid size={24} />
+          <Grid size={22} className="hover:scale-110 transition-transform" />
         </Link>
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-black dark:hover:text-white"
+          className="flex items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 group"
+          title="Profile"
         >
-          <User size={24} />
+          <div className="relative">
+            <User size={22} className="group-hover:scale-110 transition-transform" />
+            {showMenu && (
+              <div className="absolute bottom-0 right-0 w-2 h-2 bg-blue-500 rounded-full"></div>
+            )}
+          </div>
         </button>
       </nav>
 
-      {/* Profile Menu */}
+      {/* Profile Menu - Glass Style */}
       {showMenu && (
-        <div className="fixed bottom-16 right-0 bg-white dark:bg-black border dark:border-gray-800 rounded-lg p-2 mb-2 mr-2 md:hidden">
+        <div className="fixed bottom-14 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-lg border border-gray-200 dark:border-gray-800/50 rounded-2xl p-2 mb-2 shadow-xl z-50 animate-in fade-in scale-95 duration-200">
           <Link
             href="/profile"
-            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 text-sm"
+            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-900/50 text-sm rounded-lg transition-colors"
+            onClick={() => setShowMenu(false)}
           >
             Profile
           </Link>
           <button
             onClick={handleLogout}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 text-sm text-red-600"
+            className="block w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm text-red-600 dark:text-red-400 rounded-lg transition-colors"
           >
             Logout
           </button>
